@@ -1,26 +1,27 @@
 const axios = require('axios');
 const { stringify } = require('querystring');
-const { addEntry, getRateConfig } = require('./helpers');
+const { addEntry, getRateConfig, getSystemSetting } = require('./helpers');
 
 const smsService = {
   send: async (params) => {
-    // console.log('service.send: params: ', params);
     const keyPhoneNo = `${params.key}_${params.to}`;
     try {
+      const systemSetting = await getSystemSetting();
       const rateConfig = await getRateConfig(keyPhoneNo);
-      // console.log('rateConfig: ', rateConfig);
-      // console.log('PAASOO_API_URL = ' + process.env.PAASOO_API_URL);
-
       const available = await addEntry(keyPhoneNo, rateConfig);
-      // console.log('available = ' + (available ? 'yes' : 'no')); 
       if (available) {
-        // await axios.get(PAASOO_API_URL, {
-        //   headers: {
-        //     'Accept': 'application/json',
-        //     'Content-Type': 'application/json'
-        //   },
-        //   params
-        // });
+        if (systemSetting.systemMode === 'production') {
+          console.log('Productioin');
+          await axios.get(process.env.PAASOO_API_URL, {
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            params
+          });
+        } else {
+          console.log('Test Mode (SMS not actually sent)');
+        }
         return true;
       } else {
         throw new Error('quota-exceeded');

@@ -1,7 +1,29 @@
 const smsService = require('./functions/smsService');
+const { saveSystemSetting } = require('./functions/helpers');
 
 const SmsController = {
-  test: async (req, res) => {
+  upsertRateConfig: async (req, res) => {
+
+  },
+
+  upsertSystemSetting: async (req, res) => {
+    try {
+      await saveSystemSetting({
+        mode: req.body.mode
+      })
+      return res.json({
+        result: true,
+        message: 'success'
+      })
+    } catch(err) {
+      return res.json({
+        result: false,
+        message: err.message
+      })
+    }
+  },
+
+  json: async (req, res) => {
     const payload = req.query;
     console.log('test: payload: ', payload);
     console.log('test: req.params: ', req.params);

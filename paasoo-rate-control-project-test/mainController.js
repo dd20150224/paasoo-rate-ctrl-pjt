@@ -1,6 +1,6 @@
 const smsService = require('./smsService');
 
-const SmsController = {
+const MainController = {
   test: async (req, res) => {
     const payload = req.query;
     console.log('test: payload: ', payload);
@@ -25,4 +25,4 @@ const SmsController = {
   }
 }
 
-module.exports = SmsController;
+module.exports = MainController;

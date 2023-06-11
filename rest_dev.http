@@ -1,12 +1,79 @@
-###
+@endpointx = http://localhost:4000
+@endpoint = https://kqb4wqe9k5.execute-api.ap-southeast-1.amazonaws.com
 
-GET http://localhost:3000/json?key=jg7rqijp&secret=CNqXjWmM&from=YOOV&to=%2B85290279335&text=hello%20world
+
+### SEND MESSAGE
+GET {{endpoint}}/json?key=jg7rqijp&secret=CNqXjWmM&from=YOOV&to=%2B85290279335&text=hello%20world
 
 
-### Set system mode
-POST http://localhost:3000/system/set
+### GET RATE CONFIG (paasoo & phone-no)
+GET {{endpoint}}/rate-config/jg7rqijp/%2B85290279335
+Content-Type: application/json
+
+### GET RATE CONFIG (paasoo default)
+GET {{endpoint}}/rate-config/jg7rqijp/*
+Content-Type: application/json
+
+### GET RATE CONFIG (global default)
+GET {{endpoint}}/rate-config/*
+Content-Type: application/json
+
+
+
+
+### UPDATE RATE CONFIG (paasoo & phone-no)
+POST {{endpoint}}/rate-config/jg7rqijp/%2B85290279335
 Content-Type: application/json
 
 {
-  "mode": "test2"
+  "perUnit": "minute",
+  "perValue": 1,
+  "quota": 3
+}
+
+
+### UPDATE RATE CONFIG (paasoo default)
+POST {{endpoint}}/rate-config/jg7rqijp
+Content-Type: application/json
+
+{
+  "perUnit": "minute",
+  "perValue": 1,
+  "quota": 2
+}
+
+
+### UPDATE RATE CONFIG (globaL default)
+POST {{endpoint}}/rate-config/*
+Content-Type: application/json
+
+{
+  "perUnit": "minute",
+  "perValue": 1,
+  "quota": 1
+}
+
+
+
+
+### DELETE RATE CONFIG (paasoo & keyPhone)
+DELETE {{endpoint}}/rate-config/jg7rqijp/%2B85290279335
+
+### DELETE RATE CONFIG (paasoo & keyPhone)
+DELETE {{endpoint}}/rate-config/jg7rqijp
+
+### DELETE RATE CONFIG
+DELETE {{endpoint}}/rate-config/*
+
+
+### GET SYSTEM MODE
+GET {{endpoint}}/system/setting
+
+
+### SET SYSTEM MODE
+POST {{endpoint}}/system/setting
+Content-Type: application/json
+
+{
+  "executionMode": "test"
 }

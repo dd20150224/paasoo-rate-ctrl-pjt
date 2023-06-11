@@ -5,15 +5,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
-const router = require('./routes');
+
+const CoreController = require('./core/coreController')
 
 // constants
-const PORT = 3000;
-const config = {
-  key: 'jg7rqijp',
-  secret: 'CNqXjWmM',
-  from: 'YOOV'
-}
+const PORT = process.env.PORT || 3000;
 
 // initialization
 app.use(cors({
@@ -24,11 +20,19 @@ app.use(cors({
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-app.use('/', router);
+// routes
+app.get('/json', CoreController.json);
+
+app.get('/rate-config/:key/:to?', CoreController.getRateConfig);
+app.post('/rate-config/:key/:to?', CoreController.updateRateConfig);
+app.delete('/rate-config/:key/:to?', CoreController.deleteRateConfig);
+
+app.get('/system/setting', CoreController.getSystemSetting);
+app.post('/system/setting', CoreController.updateSystemSetting);
 
 app.listen(PORT, (error) =>{
     if(!error)
-        console.log("Server is Successfully Running and App is listening on port "+ PORT)
+        console.log(`Server started. (port=${PORT})`);
     else 
         console.log("Error occurred, server can't start", error);
     }

@@ -1,11 +1,9 @@
 const { DynamoDBClient, BatchWriteItemCommand } = require("@aws-sdk/client-dynamodb");
-const { BatchGetCommand, DynamoDBDocumentClient, PutCommand, UpdateCommand, QueryCommand, DeleteCommand } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, PutCommand, UpdateCommand, QueryCommand, DeleteCommand } = require("@aws-sdk/lib-dynamodb");
 
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
-
-const MODES = ['test', 'production'];
 
 const DEFAULT_CONFIG = {
   perValue: 1,
@@ -13,117 +11,7 @@ const DEFAULT_CONFIG = {
   quota: 5
 }
 
-const DEFAULT_SYSTEM_SETTING = {
-  systemKey: 'system',
-  systemMode: 'test'
-}
-
 const messageLogTable = process.env.DYNAMODB_MESSAGE_LOG_TABLE;
-const configTable = process.env.DYNAMODB_CONFIG_TABLE;
-const systemSettingTable = process.env.DYNAMODB_SYSTEM_SETTING_TABLE;
-
-const updateSystemSetting = async (docClient, payload) => {
-  console.log('updateSystemSetting: payload: ', payload);
-  const command = new UpdateCommand({
-    TableName: systemSettingTable,
-    Key: {"systemKey": "system"},
-    UpdateExpression: "set systemMode = :mode",
-    ExpressionAttributeValues: {
-      ":mode": payload.mode
-    },
-    ReturnValues: "ALL_NEW",
-  });
-  try {
-    const result = await docClient.send(command);
-    return result;
-  } catch (err) {
-    console.log('updateSystemSetting err: ', err);
-    throw err;
-  }
-}
-
-const insertSystemSetting = async (docClient, payload) => {
-  try {
-    const putCommand = new PutCommand({
-      TableName: systemSettingTable,
-      Item: {
-        systemKey: 'system',
-        systemMode: payload.mode
-      }
-    })
-    const res = await docClient.send(putCommand);
-  } catch(err) {
-    throw new Error('Fails insert system setting!');
-  }
-}
-
-const saveSystemSetting = async (payload) => {
-  if (!MODES.includes(payload.mode)) {
-    const modesWithQuotes = MODES.map(mode => `"${mode}"`);
-    throw new Error(`Invalid Values! Only ${modesWithQuotes.join(', ')} are acceptable.`);
-  }
-  const dbClient = new DynamoDBClient({region: 'ap-southeast-1'});
-  const docClient = DynamoDBDocumentClient.from(dbClient);
-  const command = new QueryCommand({
-    TableName: systemSettingTable,
-    KeyConditionExpression: "systemKey = :systemKey", // >= :offsetStartTimeStr",
-    ExpressionAttributeValues: {
-      ":systemKey": 'system',
-    }
-  })
-  const response = await docClient.send(command);
-  console.log('getSystemConfig: response: ', response);
-  try {
-    if (response.Items[0]) {
-      await updateSystemSetting(docClient, payload);
-    } else {
-      await insertSystemSetting(docClient, payload);
-    }
-    return true;
-  } catch(err) {
-    throw err;
-  }
-}
-
-const getSystemSetting = async () => {
-  const dbClient = new DynamoDBClient({region: 'ap-southeast-1'});
-  const docClient = DynamoDBDocumentClient.from(dbClient);
-  const command = new QueryCommand({
-    TableName: systemSettingTable,
-    KeyConditionExpression: "systemKey = :systemKey", // >= :offsetStartTimeStr",
-    ExpressionAttributeValues: {
-      ":systemKey": 'system',
-    }
-  })
-  try {
-    const response = await docClient.send(command);
-    console.log('getSystemConfig: response: ', response);
-    return response.Items[0] || DEFAULT_SYSTEM_SETTING;
-  } catch(err) {
-    console.log('getRateConfig err: ', err);
-    throw err;
-  }
-}
-
-const getRateConfig = async (keyPhoneNo) => {
-  const dbClient = new DynamoDBClient({region: 'ap-southeast-1'});
-  const docClient = DynamoDBDocumentClient.from(dbClient);
-  const command = new QueryCommand({
-    TableName: configTable,
-    KeyConditionExpression: "keyPhoneNo = :keyPhoneNo", // >= :offsetStartTimeStr",
-    ExpressionAttributeValues: {
-      ":keyPhoneNo": keyPhoneNo,
-    }
-  })
-  try {
-    const response = await docClient.send(command);
-    return response.Items[0] || DEFAULT_CONFIG;
-  } catch(err) {
-    console.log('getRateConfig keyPhoneNo = ' + keyPhoneNo);
-    console.log('getRateConfig err: ', err);
-    throw err;
-  }
-}
 
 const getObsolateItems = async (docClient, keyPhoneNo, offsetStartTimeStr) => {
   const command = new QueryCommand({
@@ -271,7 +159,4 @@ const addEntry = async (keyPhoneNo, rateConfig) => {
 
 module.exports = {
   addEntry,
-  getRateConfig,
-  getSystemSetting,
-  saveSystemSetting
 }

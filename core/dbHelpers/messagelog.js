@@ -95,14 +95,15 @@ const getCurrentCount = async (docClient, keyPhoneNo, currentTime, offsetStartTi
   }
 }
 
-const addItem = async (docClient, keyPhoneNo, currentTime ) => {
+const addItem = async (docClient, keyPhoneNo, currentTime, executionMode ) => {
   const currentTimeStr = currentTime.format('YYYY-MM-DD HH:mm:ss.sss');
   try {
     const putCommand = new PutCommand({
       TableName: messageLogTable,
       Item: {
         keyPhoneNo,
-        sentAt: currentTimeStr
+        sentAt: currentTimeStr,
+        mode: executionMode
       }
     })
     const res = await docClient.send(putCommand);  
@@ -114,7 +115,7 @@ const addItem = async (docClient, keyPhoneNo, currentTime ) => {
   }
 }
 
-const addEntry = async (keyPhoneNo, rateConfig) => {
+const addEntry = async (keyPhoneNo, rateConfig, executionMode) => {
   let result = false;
   try {
     const dbClient = new DynamoDBClient({region: 'ap-southeast-1'});
@@ -136,7 +137,8 @@ const addEntry = async (keyPhoneNo, rateConfig) => {
       await addItem(
         docClient, 
         keyPhoneNo, 
-        currentTime);
+        currentTime,
+        executionMode);
       await deleteItems(
         dbClient, 
         docClient,

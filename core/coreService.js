@@ -37,6 +37,7 @@ const smsService = {
   updateSystemSetting: async (payload) => {
     try {
       const updated = await saveSystemSetting(payload)
+      console.log('coreService updateSystemSetting: updated: ', updated);
       return updated;
     } catch(err) {
       throw err;
@@ -70,7 +71,7 @@ const smsService = {
       });
 
       const keyPhoneNo = `${params.key}_${params.to}`
-      const available = await addEntry(keyPhoneNo, rateConfig);
+      const available = await addEntry(keyPhoneNo, rateConfig, systemSetting.executionMode);
       if (available) {
         if (systemSetting.executionMode === 'production') {
           console.log('Productioin');

@@ -44,14 +44,16 @@ const updateSystemSetting = async (docClient, payload) => {
 
 const insertSystemSetting = async (docClient, payload) => {
   try {
+    const data = {
+      systemKey: 'system',
+      executionMode: payload.executionMode,
+    }
     const putCommand = new PutCommand({
       TableName: systemSettingTable,
-      Item: {
-        systemKey: 'system',
-        executionMode: payload.executionMode,
-      },
+      Item: data
     })
     const res = await docClient.send(putCommand)
+    return data;
   } catch (err) {
     throw new Error('Fails insert system setting!')
   }
@@ -76,12 +78,12 @@ const saveSystemSetting = async (payload) => {
   const response = await docClient.send(command)
   console.log('getSystemConfig: response: ', response)
   try {
-    if (response.Items[0]) {
-      await updateSystemSetting(docClient, payload)
-    } else {
-      await insertSystemSetting(docClient, payload)
-    }
-    return true
+    const result = response.Items[0]
+      ? await updateSystemSetting(docClient, payload)
+      : await insertSystemSetting(docClient, payload)
+    
+    console.log('systemSetting saveSystemSetting: result: ', result);
+    return result;
   } catch (err) {
     throw err
   }

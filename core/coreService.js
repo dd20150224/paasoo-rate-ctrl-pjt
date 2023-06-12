@@ -1,5 +1,4 @@
 const axios = require('axios');
-const { stringify } = require('querystring');
 const { addEntry } = require('./dbHelpers/messagelog');
 const {
   fetchRateConfig,

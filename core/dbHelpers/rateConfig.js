@@ -58,22 +58,17 @@ const insertRateConfig = async (docClient, payload) => {
 }
 
 const removeRateConfig = async (payload) => {
-  console.log(1);
   const keyPhoneNo =
     payload.key === '*' && payload.to === '*'
       ? '*'
       : `${payload.key}_${payload.to}`
 
-  console.log(2)
   const dbClient = new DynamoDBClient({ region: 'ap-southeast-1' })
-  console.log(3)
   const docClient = DynamoDBDocumentClient.from(dbClient)
-  console.log(4)
   const command = new DeleteCommand({
     TableName: configTable,
     Key: { keyPhoneNo }
   })
-  console.log(4)
   try {
     const response = await docClient.send(command)
     return true;
@@ -106,19 +101,13 @@ const saveRateConfig = async (payload) => {
     },
   })
 
-  console.log(1)
   let response = null;
-  console.log(2)
   try {
-    console.log(3)
     response = await docClient.send(command)
-    console.log(4)
   } catch(err) {
     console.log('saveRateConfig: err: ', err);
     throw err;
   }
-
-  console.log(5);
   try {
     const data = {
       keyPhoneNo,
@@ -126,7 +115,6 @@ const saveRateConfig = async (payload) => {
       perValue: payload.perValue,
       quota: payload.quota,
     }
-    console.log(6)
     const result = response.Items[0]
       ? await updateRateConfig(docClient, data)
       : await insertRateConfig(docClient, data);

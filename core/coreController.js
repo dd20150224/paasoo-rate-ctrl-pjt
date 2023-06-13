@@ -1,6 +1,7 @@
 const coreService = require('./coreService');
 const { saveSystemSetting } = require('./dbHelpers/systemSetting');
 const { saveRateConfig, removeRateConfig } = require('./dbHelpers/rateConfig');
+const { getRandomKeySecret, isValidKeySecret } = require('./helpers');
 
 const CoreController = {
   deleteRateConfig: async (req, res) => {
@@ -22,6 +23,7 @@ const CoreController = {
   updateRateConfig: async (req, res) => {
     // console.log('updateRateConfig req: ', req);
     // console.log('updateRateConfig req.body: ', req.body);
+    console.log('req.headers: ', req.headers);
     try {
       if (req.body.perUnit && req.body.perValue && req.body.quota) {
         const result = await coreService.updateRateConfig({
@@ -109,6 +111,17 @@ const CoreController = {
         message: err.toString()
       })
     }
+  },
+
+  genAuth: async (req, res) => {
+    const keySecret = await getRandomKeySecret();
+
+    // const matched = await isValidKeySecret(
+    //   keySecret.key,
+    //   keySecret.secret
+    // );
+    // console.log('genAuth: matched: ' + (matched ? 'yes' : 'no'));
+    return res.json(keySecret);
   }
 }
 

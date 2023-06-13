@@ -5,7 +5,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
-
+const { checkAuth } = require('./core/helpers');
 const CoreController = require('./core/coreController')
 
 // constants
@@ -24,11 +24,13 @@ app.use(bodyParser.json());
 app.get('/json', CoreController.json);
 
 app.get('/rate-config/:key/:to?', CoreController.getRateConfig);
-app.post('/rate-config/:key/:to?', CoreController.updateRateConfig);
+app.post('/rate-config/:key/:to?', checkAuth, CoreController.updateRateConfig);
 app.delete('/rate-config/:key/:to?', CoreController.deleteRateConfig);
 
 app.get('/system/setting', CoreController.getSystemSetting);
-app.post('/system/setting', CoreController.updateSystemSetting);
+app.post('/system/setting', checkAuth, CoreController.updateSystemSetting);
+
+app.get('/generate', checkAuth, CoreController.genAuth);
 
 app.listen(PORT, (error) =>{
     if(!error)
